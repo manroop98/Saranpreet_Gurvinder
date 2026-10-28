@@ -135,19 +135,20 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 /* scroll reveals */
 .rv{opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
+.ev .num{transition:opacity 1.6s ease}
+
 
 /* timeline rail with a lotus that follows the scroll */
 .tl-container{position:relative;width:100%}
 .tl-rail,.tl-lotus{display:none}
 @media (max-width:819px){
   .tl-rail{display:block;position:absolute;left:14px;top:0;bottom:0;width:1px;pointer-events:none;
-    background:linear-gradient(to bottom,transparent 1%,var(--red) 6%,var(--red) 94%,transparent 99%);opacity:.35}
+    background:linear-gradient(to bottom,transparent 1%,var(--red) 5%,var(--red) 95%,transparent 99%);opacity:.5}
   .tl-lotus{display:block;position:absolute;left:14px;top:0;width:34px;height:34px;transform:translate(-50%,-50%);pointer-events:none;z-index:3}
   .tl-lotus svg{width:34px;height:34px;animation:lotusGlow 3.4s ease-in-out infinite}
   @keyframes lotusGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(158,27,44,.35));transform:scale(1) rotate(0)}50%{filter:drop-shadow(0 0 10px rgba(158,27,44,.6));transform:scale(1.08) rotate(22.5deg)}}
-  .tl-container .events{padding-left:36px}
-  .ev{position:relative}
-  .ev::before{content:"";position:absolute;left:-22px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--red);
+  .tl-container .events{padding-left:30px}
+  .ev::before{content:"";position:absolute;left:-16px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--red);
     transform:translate(-50%,-50%);box-shadow:0 0 0 4px rgba(158,27,44,.15)}
 }
 
@@ -163,9 +164,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .elders{font-size:19px;font-style:italic}
 .hostnames{font-family:var(--font-cap);font-size:17px;letter-spacing:.04em;color:var(--red-deep)}
 .sched{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:4px}
-.sched li{display:flex;gap:10px;align-items:baseline}
-.sched b{font-weight:500;color:var(--red-deep);min-width:5.6em;white-space:nowrap;font-variant-numeric:tabular-nums}
-.sched .where{display:block;margin-top:6px;color:var(--muted);font-style:italic}
+.sched li{display:flex;gap:10px;align-items:baseline;justify-content:center}
+.sched b{font-weight:500;color:var(--red-deep);white-space:nowrap;font-variant-numeric:tabular-nums}
 @media (max-width:460px){.sched{gap:8px}.sched li{flex-direction:column;align-items:center;gap:0}.sched b{min-width:0}}
 .couple .who{font-family:var(--font-script);font-size:clamp(40px,9vw,56px);color:var(--red-deep);line-height:1.1}
 .couple .of{font-size:15px;font-style:italic;color:var(--muted)}
@@ -179,6 +179,10 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 
 .sec-red{background:var(--red-deep);color:var(--paper);
   background-image:radial-gradient(ellipse at 50% 0%,var(--red) 0%,transparent 70%)}
+.sec-red{position:relative}
+.sec-red::before,.sec-red::after{content:"";position:absolute;left:0;right:0;height:90px;pointer-events:none}
+.sec-red::before{top:-90px;background:linear-gradient(to bottom,rgba(107,14,28,0),var(--red-deep))}
+.sec-red::after{bottom:-90px;background:linear-gradient(to top,rgba(107,14,28,0),var(--red-deep))}
 .sec-red .label{color:var(--rose)}
 .sec-red h2{color:var(--paper)}
 .laav{display:grid;gap:30px;width:100%;text-align:center;counter-reset:l}
@@ -188,22 +192,24 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .laav-item .en{font-style:italic;opacity:.85;font-size:17px}
 .gurbani-src{font-size:14px;letter-spacing:.06em;color:var(--rose)}
 
-.events{display:grid;gap:18px;width:100%}
-.ev{display:grid;grid-template-columns:110px 1fr;gap:20px;align-items:center;text-align:left;background:#fff;
-  border:1px solid var(--rose);padding:18px}
-.ev img{width:110px;height:auto;display:block}
-.ev .day{font-family:var(--font-cap);font-size:12px;letter-spacing:.2em;color:var(--red)}
-.ev h3{margin:4px 0 6px;font-family:var(--font-cap);font-weight:500;font-size:19px;color:var(--ink);letter-spacing:.03em;line-height:1.3}
-.ev .meta{font-size:16px;line-height:1.5;color:var(--ink)}
-.ev .meta strong{font-weight:500;color:var(--red-deep)}
-.ev .note{margin-top:6px;font-size:15px;font-style:italic;color:var(--muted)}
-.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+/* events: open layout like the family site, separated by hairlines */
+.events{display:grid;width:100%}
+.ev{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:40px 0 44px;border-top:1px solid var(--rose)}
+.ev:last-child{border-bottom:1px solid var(--rose)}
+.ev > *{position:relative;z-index:1}
+.ev .num{position:absolute;z-index:0;top:50%;right:2%;transform:translateY(-50%);font-family:var(--font-script);font-size:clamp(120px,30vw,190px);line-height:1;color:var(--red);opacity:.06;pointer-events:none;user-select:none}
+.ev img{width:min(58vw,220px);height:auto;display:block;margin-bottom:10px}
+.ev .day{font-family:var(--font-cap);font-size:12px;letter-spacing:.26em;padding-left:.26em;color:var(--red);text-transform:uppercase}
+.ev h3{margin:6px 0 4px;font-family:var(--font-script);font-weight:400;font-size:clamp(40px,10vw,60px);line-height:1.05;color:var(--red-deep);text-wrap:balance}
+.ev .meta{font-size:17px;line-height:1.5;color:var(--ink);display:grid;justify-items:center}
+.ev .where{display:flex;gap:8px;align-items:flex-start;justify-content:center;margin-top:10px;color:var(--muted);font-style:italic;max-width:30ch}
+.ev .where svg{flex:0 0 auto;width:12px;height:16px;margin-top:4px;fill:var(--red);opacity:.6}
+.acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px;justify-content:center}
 .btn{all:unset;cursor:pointer;font-family:var(--font-cap);font-size:11px;letter-spacing:.16em;color:var(--red);
   border:1px solid var(--red);padding:8px 14px;border-radius:999px;text-align:center}
 .btn:hover{background:var(--red);color:var(--paper)}
 .btn:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 .btn.filled{background:var(--red);color:var(--paper)}
-@media (max-width:460px){.ev{grid-template-columns:1fr;justify-items:center;text-align:center}.ev img{width:150px}.acts{justify-content:center}}
 
 .fam-names{font-family:var(--font-cap);font-size:20px;letter-spacing:.08em;color:var(--red-deep)}
 #contacts{justify-content:center}
@@ -287,7 +293,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
     </div>
   </section>
 
-  <section class="sec sec-red">
+  <section class="sec sec-red" style="margin-top:60px">
     <div class="wrap">
       <div class="label">The Four Laavan</div>
       <h2>Anand Karaj</h2>
@@ -314,7 +320,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
     </div>
   </section>
 
-  <section class="sec hosts" style="background:var(--ivory)">
+  <section class="sec hosts" style="background:linear-gradient(to bottom,var(--paper),var(--ivory) 160px)">
     <div class="wrap">
       <div class="label">Cordially invited by</div>
       <div class="script">Sdn. Baljit Kaur &amp; S. Jatinder Singh</div>
@@ -389,9 +395,11 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
   const evWrap=document.getElementById('events');
   EVENTS.forEach((e,i)=>{
     const d=document.createElement('article');d.className='ev';
-    d.innerHTML=`<img src="${e.icon}" alt="" loading="lazy"><div><div class="day">${e.day}</div><h3>${e.name}</h3><div class="meta"><ul class="sched">${e.items.map(x=>`<li><b>${x[0]}</b>${x[1]===e.name?'':`<span>${x[1]}</span>`}</li>`).join('')}</ul><span class="where">${e.where}</span></div>
-      <div class="acts"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.map)}">Directions</a>${e.map2?`<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.map2.q)}">${e.map2.label}</a>`:''}
-      <button class="btn" data-ics="${i}">Add to calendar</button></div></div>`;
+    d.innerHTML=`<span class="num" aria-hidden="true">${i+1}</span><img src="${e.icon}" alt="" loading="lazy"><div class="day">${e.day}</div><h3>${e.name}</h3>
+      <div class="meta"><ul class="sched">${e.items.map(x=>`<li><b>${x[0]}</b>${x[1]===e.name?'':`<span>${x[1]}</span>`}</li>`).join('')}</ul>
+      <span class="where"><svg viewBox="0 0 12 16"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2A2.3 2.3 0 1 1 6 3.6a2.3 2.3 0 0 1 0 4.6z"/></svg>${e.where}</span></div>
+      <div class="acts"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.map)}">View location</a>${e.map2?`<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.map2.q)}">${e.map2.label}</a>`:''}
+      <button class="btn" data-ics="${i}">Save to calendar</button></div>`;
     evWrap.appendChild(d);
   });
   function stamp(iso){return new Date(iso).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'}
@@ -444,7 +452,9 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
     addEventListener('scroll',hideHint,{passive:true});addEventListener('touchmove',hideHint,{passive:true})}
 
   /* scroll reveals */
-  document.querySelectorAll('#invite .wrap > *:not(.tl-container), #invite .ev').forEach(el=>el.classList.add('rv'));
+  document.querySelectorAll('#invite .wrap > *:not(.tl-container)').forEach(el=>el.classList.add('rv'));
+  document.querySelectorAll('#invite .ev').forEach(ev=>{[...ev.children].forEach((c,k)=>{if(c.classList.contains('num'))return;c.classList.add('rv');c.style.transitionDelay=(k*0.09)+'s'})});
+  document.querySelectorAll('.laav-item').forEach((c,k)=>{c.classList.add('rv')});
   let revObs=null;
   function observeReveals(){
     if(!('IntersectionObserver' in window)){document.querySelectorAll('.rv').forEach(e=>e.classList.add('in'));return}
@@ -457,10 +467,18 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
   const lotus=document.getElementById('tlLotus'),tlBox=document.querySelector('.tl-container');
   function updateTl(){if(!lotus||!tlBox)return;const r=tlBox.getBoundingClientRect(),h=tlBox.offsetHeight,vh=innerHeight;
     const p=Math.max(.012,Math.min(.988,(vh*.6-r.top)/h));lotus.style.top=(h*p)+'px'}
-  addEventListener('scroll',updateTl,{passive:true});addEventListener('resize',updateTl,{passive:true});
+  addEventListener('scroll',updateTl,{passive:true});
+
+  /* hero drifts and softens as the invitation scrolls over it */
+  const frameEl=document.querySelector('.frame'),namesEl=document.querySelector('.names');let ticking=false;
+  function heroScroll(){ticking=false;if(!stage.classList.contains('settled'))return;
+    const p=Math.min(1,Math.max(0,scrollY/innerHeight));
+    frameEl.style.transform='translate(-50%,calc(-50% + '+(p*28)+'%))';
+    namesEl.style.opacity=String(1-p*1.4);stage.style.opacity=String(1-p*.35)}
+  addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(heroScroll)}},{passive:true});addEventListener('resize',updateTl,{passive:true});
 
   replay.addEventListener('click',()=>{
-    hint.classList.remove('show');
+    hint.classList.remove('show');frameEl.style.transform='';namesEl.style.opacity='';stage.style.opacity='';
     window.scrollTo(0,0);main.hidden=true;stage.classList.remove('settled');document.body.classList.add('is-locked');
     stage.classList.remove('opening','revealed');replay.hidden=true;started=false;stopPetals();if(ring3d)ring3d.reset();
   });
