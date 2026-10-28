@@ -199,7 +199,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .sec-red{position:relative}
 .sec-red::before,.sec-red::after{content:"";position:absolute;left:0;right:0;height:90px;pointer-events:none}
 .sec-red::before{top:-90px;background:linear-gradient(to bottom,rgba(107,14,28,0),var(--red-deep))}
-.sec-red::after{bottom:-90px;background:linear-gradient(to top,rgba(107,14,28,0),var(--red-deep))}
+.sec-red::after{display:none}
 .sec-red .label{color:var(--rose)}
 .sec-red h2{color:var(--paper)}
 .laav{display:grid;gap:30px;width:100%;text-align:center;counter-reset:l}
@@ -236,7 +236,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .hosts-bg{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);max-width:none;object-fit:cover;object-position:50% 70%;
   filter:blur(14px) saturate(1.05);z-index:-2}
 .hosts::before{content:"";position:absolute;inset:0;z-index:-1;
-  background:linear-gradient(to bottom,var(--paper) 0%,rgba(107,14,28,.7) 24%,rgba(74,8,20,.8) 100%)}
+  background:linear-gradient(to bottom,var(--red-deep) 0%,rgba(107,14,28,.72) 26%,rgba(74,8,20,.8) 100%)}
 .hosts .label{color:var(--rose)}
 .hosts p{color:rgba(251,248,243,.9)}
 .hosts .script{font-family:var(--font-script);font-size:clamp(34px,8vw,46px);color:var(--paper);line-height:1.2}
@@ -322,7 +322,19 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
     </div>
   </section>
 
-  <section class="sec sec-red" style="margin-top:60px">
+  <section class="sec">
+    <div class="wrap">
+      <div class="label">Celebrations</div>
+      <h2>Wedding Programme</h2>
+      <div class="tl-container">
+        <div class="tl-rail" aria-hidden="true"></div>
+        <div class="tl-lotus" id="tlLotus" aria-hidden="true"><svg viewBox="0 0 40 40"><g transform="translate(20,20)"><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(0)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(45)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(90)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(135)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(180)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(225)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(270)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(315)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(22.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(67.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(112.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(157.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(202.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(247.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(292.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(337.5)"/><circle r="2.6" fill="#d9b25f"/></g></svg></div>
+        <div class="events" id="events"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-red" style="margin-top:90px;padding-bottom:40px">
     <div class="wrap">
       <div class="label">The Four Laavan</div>
       <h2>Anand Karaj</h2>
@@ -334,18 +346,6 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
         <div class="laav-item"><div class="no">Fourth Laav</div><div class="pa" lang="pa">ਹਰਿ ਚਉਥੜੀ ਲਾਵ ਮਨਿ ਸਹਜੁ ਭਇਆ ਹਰਿ ਪਾਇਆ ਬਲਿ ਰਾਮ ਜੀਉ ॥</div><div class="en">In the fourth round, the mind becomes peaceful and tranquil, and the Lord God is found.</div></div>
       </div>
       <div class="gurbani-src">Guru Ram Das Ji · Suhi Mahalla 4</div>
-    </div>
-  </section>
-
-  <section class="sec">
-    <div class="wrap">
-      <div class="label">Celebrations</div>
-      <h2>Wedding Programme</h2>
-      <div class="tl-container">
-        <div class="tl-rail" aria-hidden="true"></div>
-        <div class="tl-lotus" id="tlLotus" aria-hidden="true"><svg viewBox="0 0 40 40"><g transform="translate(20,20)"><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(0)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(45)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(90)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(135)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(180)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(225)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(270)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(315)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(22.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(67.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(112.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(157.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(202.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(247.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(292.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(337.5)"/><circle r="2.6" fill="#d9b25f"/></g></svg></div>
-        <div class="events" id="events"></div>
-      </div>
     </div>
   </section>
 
