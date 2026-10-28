@@ -89,7 +89,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
   background:repeating-linear-gradient(100deg,transparent 0 22px,rgba(255,255,255,.55) 24px,transparent 30px);background-size:240px 100%;
   animation:ripple 9s linear infinite;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
 @keyframes ripple{to{background-position:240px 0}}
-#petals{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#petals{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
 .names{position:absolute;left:0;right:0;top:18.5%;display:grid;justify-items:center;gap:1.2cqh;text-align:center;padding:0 6cqw}
 .names::before{content:"";position:absolute;left:8%;right:8%;top:-3cqh;bottom:-2cqh;z-index:-1;
   background:radial-gradient(closest-side,rgba(255,246,236,.75),rgba(255,240,225,.35) 60%,transparent)}
@@ -118,12 +118,38 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .cloud{animation:drift 40s linear infinite}
 @keyframes drift{from{transform:translateX(-60px)}to{transform:translateX(60px)}}
 
-.scroll-cue{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
-  z-index:3;display:grid;justify-items:center;gap:6px;font-family:var(--font-cap);font-size:11px;letter-spacing:.24em;
-  color:var(--red);text-decoration:none;opacity:0;transition:opacity 1s ease 4.2s}
-.revealed .scroll-cue{opacity:.95}
-.scroll-cue span{width:1px;height:28px;background:linear-gradient(var(--red),transparent);animation:drop 1.8s ease-in-out infinite}
-@keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+/* scroll hint, as on the family site */
+#scrollHint{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:61;
+  display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;pointer-events:none;transition:opacity .6s ease}
+#scrollHint.show{opacity:.85}
+#scrollHint.hidden{opacity:0!important}
+#scrollHint small{font-family:var(--font-cap);font-size:10px;letter-spacing:.3em;padding-left:.3em;color:#fff;text-shadow:0 1px 6px rgba(60,10,20,.6)}
+.sh-finger{width:22px;height:34px;filter:drop-shadow(0 1px 4px rgba(60,10,20,.5));animation:fingerSwipe 1.8s ease-in-out infinite}
+@keyframes fingerSwipe{0%{transform:translateY(-6px);opacity:.35}40%{transform:translateY(8px);opacity:1}70%{transform:translateY(8px);opacity:.6}100%{transform:translateY(-6px);opacity:.35}}
+.sh-dots{display:flex;flex-direction:column;align-items:center;gap:3px}
+.sh-dots span{display:block;width:3px;height:3px;border-radius:50%;background:#fff;animation:dotFade 1.8s ease-in-out infinite}
+.sh-dots span:nth-child(2){animation-delay:.2s}
+.sh-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotFade{0%,100%{opacity:.15}40%{opacity:.95}}
+
+/* scroll reveals */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+/* timeline rail with a lotus that follows the scroll */
+.tl-container{position:relative;width:100%}
+.tl-rail,.tl-lotus{display:none}
+@media (max-width:819px){
+  .tl-rail{display:block;position:absolute;left:14px;top:0;bottom:0;width:1px;pointer-events:none;
+    background:linear-gradient(to bottom,transparent 1%,var(--red) 6%,var(--red) 94%,transparent 99%);opacity:.35}
+  .tl-lotus{display:block;position:absolute;left:14px;top:0;width:34px;height:34px;transform:translate(-50%,-50%);pointer-events:none;z-index:3}
+  .tl-lotus svg{width:34px;height:34px;animation:lotusGlow 3.4s ease-in-out infinite}
+  @keyframes lotusGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(158,27,44,.35));transform:scale(1) rotate(0)}50%{filter:drop-shadow(0 0 10px rgba(158,27,44,.6));transform:scale(1.08) rotate(22.5deg)}}
+  .tl-container .events{padding-left:36px}
+  .ev{position:relative}
+  .ev::before{content:"";position:absolute;left:-22px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--red);
+    transform:translate(-50%,-50%);box-shadow:0 0 0 4px rgba(158,27,44,.15)}
+}
 
 /* invitation */
 .sec{padding-block:80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -225,9 +251,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
         <div class="place">Gurudwara Chhevi Patshahi, Tanda</div>
       </div>
     </div>
-    <canvas id="petals"></canvas>
   </div>
-  <a class="scroll-cue" href="#invite">Scroll<span></span></a>
 </div>
 
 <main id="invite" hidden>
@@ -282,7 +306,11 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
     <div class="wrap">
       <div class="label">Celebrations</div>
       <h2>Wedding Programme</h2>
-      <div class="events" id="events"></div>
+      <div class="tl-container">
+        <div class="tl-rail" aria-hidden="true"></div>
+        <div class="tl-lotus" id="tlLotus" aria-hidden="true"><svg viewBox="0 0 40 40"><g transform="translate(20,20)"><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(0)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(45)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(90)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(135)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(180)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(225)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(270)"/><path d="M0 0C-3-4-2.5-13 0-16C2.5-13 3-4 0 0" fill="#9e1b2c" opacity=".85" transform="rotate(315)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(22.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(67.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(112.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(157.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(202.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(247.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(292.5)"/><path d="M0 0C-2-3-1.5-9 0-11C1.5-9 2-3 0 0" fill="#e8b4b8" transform="rotate(337.5)"/><circle r="2.6" fill="#d9b25f"/></g></svg></div>
+        <div class="events" id="events"></div>
+      </div>
     </div>
   </section>
 
@@ -300,6 +328,12 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
   <div class="foot">Saranpreet &amp; Gurvinder · 07.01.2027</div>
 </main>
 
+<canvas id="petals" aria-hidden="true"></canvas>
+<div id="scrollHint" aria-hidden="true">
+  <svg class="sh-finger" viewBox="0 0 22 34" fill="none"><rect x="7" y="0" width="8" height="20" rx="4" fill="#fff" opacity=".95"/><path d="M3 14C3 14 3 28 11 32C19 28 19 14 19 14" stroke="#fff" stroke-width="1.5" opacity=".8"/><rect x="9.5" y="6" width="3" height="8" rx="1.5" fill="#9e1b2c"/></svg>
+  <div class="sh-dots"><span></span><span></span><span></span></div>
+  <small>SCROLL</small>
+</div>
 <button class="fab" id="music" hidden>Music</button>
 <audio id="track" preload="none" playsinline></audio>
 <button class="fab" id="replay" hidden>Replay</button>
@@ -400,9 +434,33 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
     setTimeout(()=>{
       stage.classList.add('settled');main.hidden=false;document.body.classList.remove('is-locked');window.scrollTo(0,0);
       replay.hidden=false;musicBtn.hidden=noMusic;
+      showHint();observeReveals();updateTl();
     },4500);
   });
+  /* scroll hint: shows after the opening, goes away at the first scroll */
+  const hint=document.getElementById('scrollHint');
+  function hideHint(){hint.classList.add('hidden');removeEventListener('scroll',hideHint);removeEventListener('touchmove',hideHint)}
+  function showHint(){hint.classList.remove('hidden');hint.classList.add('show');
+    addEventListener('scroll',hideHint,{passive:true});addEventListener('touchmove',hideHint,{passive:true})}
+
+  /* scroll reveals */
+  document.querySelectorAll('#invite .wrap > *:not(.tl-container), #invite .ev').forEach(el=>el.classList.add('rv'));
+  let revObs=null;
+  function observeReveals(){
+    if(!('IntersectionObserver' in window)){document.querySelectorAll('.rv').forEach(e=>e.classList.add('in'));return}
+    if(revObs)revObs.disconnect();
+    revObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');revObs.unobserve(e.target)}}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+    document.querySelectorAll('.rv:not(.in)').forEach(e=>revObs.observe(e));
+  }
+
+  /* timeline lotus */
+  const lotus=document.getElementById('tlLotus'),tlBox=document.querySelector('.tl-container');
+  function updateTl(){if(!lotus||!tlBox)return;const r=tlBox.getBoundingClientRect(),h=tlBox.offsetHeight,vh=innerHeight;
+    const p=Math.max(.012,Math.min(.988,(vh*.6-r.top)/h));lotus.style.top=(h*p)+'px'}
+  addEventListener('scroll',updateTl,{passive:true});addEventListener('resize',updateTl,{passive:true});
+
   replay.addEventListener('click',()=>{
+    hint.classList.remove('show');
     window.scrollTo(0,0);main.hidden=true;stage.classList.remove('settled');document.body.classList.add('is-locked');
     stage.classList.remove('opening','revealed');replay.hidden=true;started=false;stopPetals();if(ring3d)ring3d.reset();
   });
@@ -458,7 +516,7 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
     const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
     (function loop(){
       const t=clock.getElapsedTime();
-      if(spinStart===null){const k=reduce?0:1;grp.rotation.y=Math.sin(t*.55)*.55*k;grp.position.y=Math.sin(t*1.2)*.04*k}
+      if(spinStart===null){const k=reduce?0:1;grp.rotation.y=Math.sin(t*.6)*.75*k;grp.position.y=Math.sin(t*1.2)*.04*k}
       else{grp.rotation.y=base0+ease(Math.min(1,(t-spinStart)/1.6))*(target0-base0);grp.position.y=0}
       sp.material.opacity=reduce?.7:Math.max(0,.55+.45*Math.pow(Math.max(0,Math.sin(t*2.3)),6)+.2*Math.sin(t*7.1));
       sp.material.rotation=t*.4;
@@ -479,7 +537,7 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
       ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.globalAlpha=.9;ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=3;
       ctx.beginPath();ctx.ellipse(0,0,p.s,p.s*.55,0,0,6.28);ctx.fill();ctx.restore()}
     raf=requestAnimationFrame(frame)}
-  function startPetals(){if(reduce)return;resize();petals=Array.from({length:Math.min(60,Math.round(W/14))},make);if(!raf)frame()}
+  function startPetals(){if(reduce)return;resize();petals=Array.from({length:Math.min(45,Math.round(W/16))},make);if(!raf)frame()}
   function stopPetals(){if(raf)cancelAnimationFrame(raf);raf=null;ctx.clearRect(0,0,cv.width,cv.height)}
   addEventListener('resize',()=>{if(raf)resize()});
 })();
