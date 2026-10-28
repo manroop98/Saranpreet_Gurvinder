@@ -215,7 +215,19 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 #contacts{justify-content:center}
 #contacts .btn{display:grid;gap:4px;padding:12px 20px}
 #contacts .btn small{font-family:var(--font-body);font-size:13px;letter-spacing:.02em;text-transform:none;opacity:.85}
-.hosts .script{font-family:var(--font-script);font-size:clamp(34px,8vw,46px);color:var(--red-deep);line-height:1.2}
+.hosts{position:relative;overflow:hidden;isolation:isolate;padding-block:120px 110px;color:var(--paper)}
+.hosts-bg{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);max-width:none;object-fit:cover;object-position:50% 70%;
+  filter:blur(14px) saturate(1.05);z-index:-2}
+.hosts::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(to bottom,var(--paper) 0%,rgba(107,14,28,.82) 22%,rgba(74,8,20,.86) 100%)}
+.hosts .label{color:var(--rose)}
+.hosts p{color:rgba(251,248,243,.9)}
+.hosts .script{font-family:var(--font-script);font-size:clamp(34px,8vw,46px);color:var(--paper);line-height:1.2}
+.hosts .fam-names{color:var(--paper)}
+.hosts .btn{color:var(--paper);border-color:rgba(251,248,243,.7)}
+.hosts .btn.filled{background:var(--paper);color:var(--red-deep);border-color:var(--paper)}
+.hosts .btn.filled:hover{background:transparent;color:var(--paper)}
+.hosts .foot{padding:40px 0 0;color:rgba(251,248,243,.6)}
 .foot{padding-block:28px 90px;text-align:center;font-family:var(--font-cap);font-size:11px;letter-spacing:.24em;color:var(--muted)}
 
 .fab{position:fixed;z-index:4;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-family:var(--font-cap);font-size:11px;letter-spacing:.2em;
@@ -320,7 +332,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
     </div>
   </section>
 
-  <section class="sec hosts" style="background:linear-gradient(to bottom,var(--paper),var(--ivory) 160px)">
+  <section class="sec hosts">
+    <img class="hosts-bg" id="hostsBg" alt="" aria-hidden="true">
     <div class="wrap">
       <div class="label">Cordially invited by</div>
       <div class="script">Sdn. Baljit Kaur &amp; S. Jatinder Singh</div>
@@ -329,9 +342,9 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
       <p>Your presence is extremely important to us. Please join us!</p>
       <div class="label" style="margin-top:18px">RSVP</div>
       <div class="acts" id="contacts" hidden></div>
+      <div class="foot">Saranpreet &amp; Gurvinder · 07.01.2027</div>
     </div>
   </section>
-  <div class="foot">Saranpreet &amp; Gurvinder · 07.01.2027</div>
 </main>
 
 <canvas id="petals" aria-hidden="true"></canvas>
@@ -381,6 +394,7 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
   document.body.classList.add('is-locked');
   let started=false;
   document.getElementById('backdrop').src=document.querySelector('.photo').src;
+  document.getElementById('hostsBg').src=document.querySelector('.photo').src;
 
   /* personal greeting: ?n=Name+Surname  (also accepts ?Name+Surname) */
   let guest='';
@@ -550,12 +564,19 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
   function resize(){const d=window.devicePixelRatio||1;W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
   function make(){return{x:Math.random()*W,y:-20-Math.random()*H,s:5+Math.random()*7,vy:.6+Math.random()*1.1,vx:-.3+Math.random()*.6,
     r:Math.random()*6.28,vr:-.03+Math.random()*.06,sw:Math.random()*6.28,c:colors[Math.floor(Math.random()*colors.length)]}}
+  let FULL=45,FEW=10,target=45;
+  function petalTarget(){const past=document.getElementById('stage').classList.contains('settled')&&scrollY>innerHeight*.55;
+    target=past?FEW:FULL;
+    if(!past)petals.forEach((p,i)=>{if(i<target&&p.dead){Object.assign(p,make());p.dead=false}})}
+  addEventListener('scroll',petalTarget,{passive:true});
   function frame(){ctx.clearRect(0,0,W,H);
-    for(const p of petals){p.sw+=.02;p.y+=p.vy;p.x+=p.vx+Math.sin(p.sw)*.6;p.r+=p.vr;if(p.y>H+20)Object.assign(p,make(),{y:-20});
+    for(let i=0;i<petals.length;i++){const p=petals[i];if(p.dead)continue;
+      p.sw+=.02;p.y+=p.vy;p.x+=p.vx+Math.sin(p.sw)*.6;p.r+=p.vr;
+      if(p.y>H+20){if(i>=target){p.dead=true;continue}Object.assign(p,make(),{y:-20})}
       ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.globalAlpha=.9;ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=3;
       ctx.beginPath();ctx.ellipse(0,0,p.s,p.s*.55,0,0,6.28);ctx.fill();ctx.restore()}
     raf=requestAnimationFrame(frame)}
-  function startPetals(){if(reduce)return;resize();petals=Array.from({length:Math.min(45,Math.round(W/16))},make);if(!raf)frame()}
+  function startPetals(){if(reduce)return;resize();FULL=Math.min(45,Math.round(W/16));FEW=Math.max(6,Math.round(FULL/4));target=FULL;petals=Array.from({length:FULL},make);if(!raf)frame()}
   function stopPetals(){if(raf)cancelAnimationFrame(raf);raf=null;ctx.clearRect(0,0,cv.width,cv.height)}
   addEventListener('resize',()=>{if(raf)resize()});
 })();
