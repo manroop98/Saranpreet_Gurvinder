@@ -25,15 +25,17 @@
 }
 [hidden]{display:none!important}
 *,*::before,*::after{box-sizing:border-box}
-html,body{height:100%;margin:0}
-html,body{overflow:hidden;overscroll-behavior:none}
-html.unlocked,body.unlocked{overflow-y:auto;overflow-x:hidden;height:auto}
+html,body{margin:0}
+html{background:var(--paper)}
+body{overflow-x:hidden}
+body.is-locked{overflow:hidden;position:fixed;left:0;top:0;width:100%;height:100%}
 body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:18px;-webkit-text-size-adjust:100%}
 
 /* stage */
-.stage{position:relative;height:100vh;height:100svh;min-height:100%;overflow:hidden;display:grid;place-items:center;
+.stage{position:fixed;inset:0;z-index:50;overflow:hidden;display:grid;place-items:center;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:radial-gradient(ellipse at 50% 45%,#ffffff 0%,var(--paper) 45%,var(--ivory) 100%)}
+.stage.settled{position:relative;inset:auto;z-index:auto;height:100vh;height:100svh}
 .stage::before{content:"";position:absolute;inset:14px;border:1px solid var(--rose);pointer-events:none;
   margin:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 .intro{position:relative;display:grid;justify-items:center;gap:22px;text-align:center;z-index:3}
@@ -53,9 +55,14 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 .ring .fallback{display:none;position:absolute;inset:8%;width:84%;height:auto}
 .no-webgl #ring3d{display:none}
 .no-webgl .ring .fallback{display:block}
-.mono{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:baseline;gap:4px;
-  font-family:var(--font-script);font-size:clamp(46px,13vw,64px);line-height:1;color:var(--red);pointer-events:none;transition:opacity .35s ease}
-.mono i{font-style:normal;font-family:var(--font-cap);font-size:.36em;align-self:center;color:var(--ink);opacity:.7}
+.mono{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:6px;
+  pointer-events:none;transition:opacity .35s ease;white-space:nowrap}
+.mono .ini{display:flex;align-items:center;gap:.12em;padding:0 .2em;font-family:var(--font-cap);font-weight:500;
+  font-size:clamp(38px,10.5vw,50px);line-height:1.15;color:var(--red)}
+.mono .ini i{font-family:var(--font-script);font-style:normal;font-weight:400;font-size:.7em;line-height:1.3;color:var(--ink);opacity:.55;padding:0 .08em}
+.mono small{font-family:var(--font-cap);font-size:10px;letter-spacing:.32em;padding-left:.32em;color:var(--ink);opacity:.6}
+.mono::before,.mono::after{content:"";width:46px;height:1px;background:var(--red);opacity:.5}
+.mono::before{order:-1}
 .hint{font-family:var(--font-cap);font-size:12px;letter-spacing:.26em;padding-left:.26em;color:var(--red);animation:pulse 2.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:.95}}
 .opening .ring{animation:zoomAway 1.6s cubic-bezier(.6,0,.3,1) forwards}
@@ -185,12 +192,6 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 #replay{right:max(16px,env(safe-area-inset-right,0px))}
 #music{left:max(16px,env(safe-area-inset-left,0px))}
 
-@media (prefers-reduced-motion:reduce){
-  .hint,.sunglow,.water,.revealed .photo{animation:none}
-  .opening .ring{animation:none;opacity:0;transition:opacity .4s}
-  .scene{transition:clip-path .01s}
-  .scene-zoom,.names>*{transition:opacity .6s}
-}
 </style>
 </head>
 <body>
@@ -204,7 +205,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
       <div class="ring">
         <canvas id="ring3d"></canvas>
         <svg class="fallback" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="112" r="70" fill="none" stroke="#b7b3ae" stroke-width="12"/><path d="M100 20l16 14-16 18-16-18z" fill="#fff" stroke="#b7b3ae" stroke-width="2"/></svg>
-        <div class="mono" aria-hidden="true">S<i>&amp;</i>G</div>
+        <div class="mono" aria-hidden="true"><span class="ini">S<i>&amp;</i>G</span><small>07 · 01 · 27</small></div>
       </div>
     </button>
     <div class="hint">Tap the ring</div>
@@ -229,7 +230,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
   <a class="scroll-cue" href="#invite">Scroll<span></span></a>
 </div>
 
-<main id="invite">
+<main id="invite" hidden>
   <section class="sec">
     <div class="wrap">
       <div class="ik" lang="pa">ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ</div>
@@ -300,6 +301,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-
 </main>
 
 <button class="fab" id="music" hidden>Music</button>
+<audio id="track" preload="none" playsinline></audio>
 <button class="fab" id="replay" hidden>Replay</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -334,7 +336,9 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
   const stage=document.getElementById('stage');
   const btn=document.getElementById('ringBtn');
   const replay=document.getElementById('replay');
-  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduce=false;
+  const main=document.getElementById('invite');
+  document.body.classList.add('is-locked');
   let started=false;
   document.getElementById('backdrop').src=document.querySelector('.photo').src;
 
@@ -372,23 +376,34 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
     WHATSAPP.forEach(w=>{const a=document.createElement('a');a.className='btn filled';a.target='_blank';a.rel='noopener';
       a.href='https://wa.me/'+w.number+'?text='+encodeURIComponent('Sat Sri Akal Ji, we will be there for Saranpreet & Gurvinder\'s wedding!');a.innerHTML='WhatsApp '+w.label+'<small>'+w.role+' · '+w.show+'</small>';c.appendChild(a)})}
 
-  /* music: shown only if a track loads */
-  const musicBtn=document.getElementById('music');const audio=new Audio();audio.loop=true;audio.preload='auto';audio.setAttribute('playsinline','');
-  let musicOk=false;audio.src=MUSIC[Math.floor(Math.random()*MUSIC.length)];
-  audio.addEventListener('playing',()=>{musicOk=true;musicBtn.textContent='Pause'});
-  audio.addEventListener('error',()=>{musicOk=false;musicBtn.hidden=true});
-  musicBtn.addEventListener('click',()=>{if(audio.paused){audio.play().catch(()=>{});musicBtn.textContent='Pause'}else{audio.pause();musicBtn.textContent='Music'}});
+  /* music: same approach as the family site, an <audio> element started inside the tap */
+  const musicBtn=document.getElementById('music');const track=document.getElementById('track');
+  let mIdx=Math.floor(Math.random()*MUSIC.length),noMusic=false;
+  function playMusic(){
+    if(noMusic)return;
+    if(!track.getAttribute('src'))track.src=MUSIC[mIdx];
+    const pr=track.play();
+    if(pr&&pr.then)pr.then(()=>{musicBtn.textContent='Pause'}).catch(()=>{musicBtn.textContent='Music'});
+  }
+  track.addEventListener('ended',()=>{let n=mIdx;while(n===mIdx&&MUSIC.length>1)n=Math.floor(Math.random()*MUSIC.length);mIdx=n;track.src=MUSIC[mIdx];track.play().catch(()=>{})});
+  track.addEventListener('pause',()=>{musicBtn.textContent='Music'});
+  track.addEventListener('playing',()=>{musicBtn.textContent='Pause'});
+  musicBtn.addEventListener('click',()=>{if(track.paused)playMusic();else track.pause()});
+  try{fetch(MUSIC[0],{method:'HEAD'}).then(r=>{if(!r.ok)noMusic=true}).catch(()=>{noMusic=true})}catch(e){noMusic=true}
 
   const ring3d=initRing();
   btn.addEventListener('click',()=>{
     if(started)return;started=true;
     stage.classList.add('opening');if(ring3d)ring3d.spin();
-    try{const pr=audio.play();if(pr&&pr.catch)pr.catch(()=>{})}catch(e){}
+    playMusic();
     setTimeout(()=>{stage.classList.add('revealed');startPetals()},reduce?100:900);
-    setTimeout(()=>{replay.hidden=false;musicBtn.hidden=!(musicOk||audio.readyState>0);document.body.classList.add('unlocked');document.documentElement.classList.add('unlocked')},reduce?400:4500);
+    setTimeout(()=>{
+      stage.classList.add('settled');main.hidden=false;document.body.classList.remove('is-locked');window.scrollTo(0,0);
+      replay.hidden=false;musicBtn.hidden=noMusic;
+    },4500);
   });
   replay.addEventListener('click',()=>{
-    document.body.scrollTop=0;document.documentElement.scrollTop=0;document.body.classList.remove('unlocked');document.documentElement.classList.remove('unlocked');
+    window.scrollTo(0,0);main.hidden=true;stage.classList.remove('settled');document.body.classList.add('is-locked');
     stage.classList.remove('opening','revealed');replay.hidden=true;started=false;stopPetals();if(ring3d)ring3d.reset();
   });
 
