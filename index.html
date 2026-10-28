@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Saranpreet &amp; Gurvinder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+Gurmukhi:wght@400;600&display=swap">
+<style>
+/* Layout: full-screen ring intro -> scene revealed through an expanding circle -> scrolling invitation in ivory with red bands */
+:root{
+  --paper:#fbf8f3;
+  --ivory:#f2ebe0;
+  --red:#9e1b2c;
+  --red-deep:#6b0e1c;
+  --ink:#2b1b1e;
+  --muted:#7a6467;
+  --rose:#ead3d2;
+  --silver:#b7b3ae;
+  --font-script:"Pinyon Script","Snell Roundhand","Apple Chancery",cursive;
+  --font-cap:"Cinzel","Trajan Pro",Georgia,serif;
+  --font-body:"EB Garamond","Garamond","Palatino Linotype",Georgia,serif;
+  --font-pa:"Noto Serif Gurmukhi","Raavi","Mukta Mahee",serif;
+  color-scheme:light;
+}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:18px;overflow:hidden}
+body.unlocked{overflow-y:auto;overflow-x:hidden}
+
+/* stage */
+.stage{position:relative;height:100%;min-height:100%;overflow:hidden;display:grid;place-items:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:radial-gradient(ellipse at 50% 45%,#ffffff 0%,var(--paper) 45%,var(--ivory) 100%)}
+.stage::before{content:"";position:absolute;inset:14px;border:1px solid var(--rose);pointer-events:none;
+  margin:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.intro{position:relative;display:grid;justify-items:center;gap:22px;text-align:center;z-index:3}
+.eyebrow{font-family:var(--font-cap);letter-spacing:.34em;padding-left:.34em;font-size:12px;color:var(--red);text-transform:uppercase}
+.guest{display:grid;gap:6px;justify-items:center;max-width:min(92vw,560px)}
+.guest small{font-family:var(--font-cap);font-size:12px;letter-spacing:.34em;padding-left:.34em;color:var(--ink);opacity:.7;text-transform:uppercase}
+.guest span{font-family:var(--font-script);font-size:clamp(40px,11vw,58px);line-height:1.1;color:var(--red-deep);text-wrap:balance}
+.guest em{font-style:italic;font-size:18px;color:var(--ink);opacity:.85}
+.opening .guest{opacity:0;transition:opacity .4s}
+.intro .lead{font-family:var(--font-script);font-size:clamp(38px,10vw,52px);color:var(--red);line-height:1;margin-top:-6px}
+.ring-btn{all:unset;cursor:pointer;width:min(78vw,340px);aspect-ratio:1;max-width:100%;border-radius:50%;
+  display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.ring-btn:focus-visible{outline:2px solid var(--red);outline-offset:8px}
+.ring{position:relative;width:100%;height:100%}
+.ring::after{content:"";position:absolute;left:24%;right:24%;bottom:13%;height:7%;border-radius:50%;background:radial-gradient(closest-side,rgba(60,30,30,.22),transparent);z-index:-1}
+#ring3d{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ring .fallback{display:none;position:absolute;inset:8%;width:84%;height:auto}
+.no-webgl #ring3d{display:none}
+.no-webgl .ring .fallback{display:block}
+.mono{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:baseline;gap:4px;
+  font-family:var(--font-script);font-size:clamp(46px,13vw,64px);line-height:1;color:var(--red);pointer-events:none;transition:opacity .35s ease}
+.mono i{font-style:normal;font-family:var(--font-cap);font-size:.36em;align-self:center;color:var(--ink);opacity:.7}
+.hint{font-family:var(--font-cap);font-size:12px;letter-spacing:.26em;padding-left:.26em;color:var(--red);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.95}}
+.opening .ring{animation:zoomAway 1.6s cubic-bezier(.6,0,.3,1) forwards}
+.opening .mono{opacity:0}
+.opening .hint,.opening .eyebrow,.opening .lead{opacity:0;animation:none;transition:opacity .4s}
+.revealed .intro{visibility:hidden;transition:visibility 0s 2.6s}
+@keyframes zoomAway{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(5);opacity:0}}
+
+/* scene: the artwork keeps its 2:3 frame; it crops on phones and sits on a blurred copy on wide screens */
+.scene{position:absolute;inset:0;z-index:2;clip-path:circle(0% at 50% 50%);transition:clip-path 1.8s cubic-bezier(.65,0,.25,1) .7s;background:#f3c9a0;overflow:hidden}
+.revealed .scene{clip-path:circle(150% at 50% 50%)}
+.backdrop{position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);max-width:none;object-fit:cover;filter:blur(28px) saturate(1.1) brightness(.95)}
+.frame{position:absolute;left:50%;top:50%;height:100%;aspect-ratio:2/3;transform:translate(-50%,-50%);container-type:size;overflow:hidden;
+  box-shadow:0 0 60px rgba(60,20,10,.35)}
+.scene-zoom{position:absolute;inset:0;transform:scale(1.15);transition:transform 6s ease-out .7s}
+.revealed .scene-zoom{transform:scale(1)}
+.photo{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+.revealed .photo{animation:kenburns 26s ease-in-out 3s infinite alternate}
+@keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.05) translateY(-1%)}}
+.sunglow{position:absolute;left:85%;top:56%;width:60cqw;height:60cqw;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(closest-side,rgba(255,214,150,.55),rgba(255,190,120,.18) 45%,transparent);mix-blend-mode:screen;animation:glow 5s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+.water{position:absolute;left:0;right:0;top:66%;height:12%;mix-blend-mode:soft-light;opacity:.6;
+  background:repeating-linear-gradient(100deg,transparent 0 22px,rgba(255,255,255,.55) 24px,transparent 30px);background-size:240px 100%;
+  animation:ripple 9s linear infinite;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+@keyframes ripple{to{background-position:240px 0}}
+#petals{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.names{position:absolute;left:0;right:0;top:18.5%;display:grid;justify-items:center;gap:1.2cqh;text-align:center;padding:0 6cqw}
+.names::before{content:"";position:absolute;left:8%;right:8%;top:-3cqh;bottom:-2cqh;z-index:-1;
+  background:radial-gradient(closest-side,rgba(255,246,236,.75),rgba(255,240,225,.35) 60%,transparent)}
+.names>*{opacity:0;transform:translateY(14px);transition:opacity 1.2s ease,transform 1.2s ease}
+.revealed .names>*{opacity:1;transform:none}
+.revealed .names h1{transition-delay:2.7s}
+.revealed .names .date{transition-delay:3.3s}
+.revealed .names .place{transition-delay:3.6s}
+.ik{font-family:var(--font-pa);font-size:24px;color:var(--red)}
+.names h1{margin:0;font-family:var(--font-script);font-weight:400;font-size:8.6cqw;line-height:1.08;color:var(--red-deep);
+  text-shadow:0 1px 0 rgba(255,255,255,.7),0 0 18px rgba(255,248,240,.9)}
+.names h1 span{display:block;white-space:nowrap}
+.names h1 .amp{font-family:var(--font-cap);font-size:.34em;color:var(--ink);opacity:.8;margin:.05em 0}
+.date{font-family:var(--font-cap);font-weight:600;font-size:max(12px,3.1cqw);letter-spacing:.28em;padding-left:.28em;color:var(--ink);display:flex;align-items:center;gap:2.4cqw;
+  text-shadow:0 0 10px rgba(255,248,240,.95)}
+.date::before,.date::after{content:"";width:6cqw;height:1px;background:var(--red-deep)}
+.place{font-size:max(13px,3.2cqw);font-style:italic;font-weight:500;color:var(--ink);text-shadow:0 0 10px rgba(255,248,240,.95)}
+
+.lamp{animation:flicker 2.2s ease-in-out infinite}
+.lamp:nth-of-type(2n){animation-duration:1.7s;animation-delay:.4s}
+@keyframes flicker{0%,100%{opacity:.95}40%{opacity:.5}60%{opacity:.85}}
+.shimmer{animation:shimmer 5s ease-in-out infinite}
+@keyframes shimmer{0%,100%{transform:translateX(0)}50%{transform:translateX(14px)}}
+.dupatta{animation:sway 4.5s ease-in-out infinite;transform-origin:450px 640px}
+@keyframes sway{0%,100%{transform:rotate(0)}50%{transform:rotate(1.4deg)}}
+.cloud{animation:drift 40s linear infinite}
+@keyframes drift{from{transform:translateX(-60px)}to{transform:translateX(60px)}}
+
+.scroll-cue{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  z-index:3;display:grid;justify-items:center;gap:6px;font-family:var(--font-cap);font-size:11px;letter-spacing:.24em;
+  color:var(--red);text-decoration:none;opacity:0;transition:opacity 1s ease 4.2s}
+.revealed .scroll-cue{opacity:.95}
+.scroll-cue span{width:1px;height:28px;background:linear-gradient(var(--red),transparent);animation:drop 1.8s ease-in-out infinite}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* invitation */
+.sec{padding-block:80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:640px;margin:0 auto;display:grid;gap:22px;justify-items:center;text-align:center}
+.label{font-family:var(--font-cap);font-size:12px;letter-spacing:.32em;padding-left:.32em;color:var(--red);text-transform:uppercase}
+.sec h2{margin:0;font-family:var(--font-script);font-weight:400;font-size:clamp(44px,10vw,64px);color:var(--red);line-height:1.05;text-wrap:balance}
+.sec p{margin:0;line-height:1.65;max-width:32em}
+.knot{width:140px;height:18px;color:var(--red)}
+.couple{display:grid;gap:4px}
+.shabad{font-family:var(--font-pa);font-size:17px;line-height:1.9;color:var(--red-deep)}
+.elders{font-size:19px;font-style:italic}
+.hostnames{font-family:var(--font-cap);font-size:17px;letter-spacing:.04em;color:var(--red-deep)}
+.sched{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:4px}
+.sched li{display:flex;gap:10px;align-items:baseline}
+.sched b{font-weight:500;color:var(--red-deep);min-width:5.6em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sched .where{display:block;margin-top:6px;color:var(--muted);font-style:italic}
+@media (max-width:460px){.sched{gap:8px}.sched li{flex-direction:column;align-items:center;gap:0}.sched b{min-width:0}}
+.couple .who{font-family:var(--font-script);font-size:clamp(40px,9vw,56px);color:var(--red-deep);line-height:1.1}
+.couple .of{font-size:15px;font-style:italic;color:var(--muted)}
+.couple .with{font-family:var(--font-cap);font-size:13px;letter-spacing:.3em;padding-left:.3em;color:var(--ink);margin:10px 0}
+.datepill{display:inline-flex;align-items:center;gap:14px;font-family:var(--font-cap);letter-spacing:.14em;font-size:14px;color:var(--ink)}
+.datepill b{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--red);color:var(--paper);font-size:22px;font-weight:500}
+.count{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.count div{box-sizing:border-box;width:76px;padding:14px 4px;border:1px solid var(--rose);background:#fff;display:grid;gap:2px}
+.count b{font-family:var(--font-cap);font-size:28px;font-weight:500;color:var(--red);font-variant-numeric:tabular-nums}
+.count small{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+.sec-red{background:var(--red-deep);color:var(--paper);
+  background-image:radial-gradient(ellipse at 50% 0%,var(--red) 0%,transparent 70%)}
+.sec-red .label{color:var(--rose)}
+.sec-red h2{color:var(--paper)}
+.laav{display:grid;gap:30px;width:100%;text-align:center;counter-reset:l}
+.laav-item{display:grid;gap:6px;padding-top:26px;border-top:1px solid rgba(234,211,210,.25)}
+.laav-item .no{font-family:var(--font-cap);font-size:12px;letter-spacing:.3em;color:var(--rose)}
+.laav-item .pa{font-family:var(--font-pa);font-size:19px;line-height:1.7}
+.laav-item .en{font-style:italic;opacity:.85;font-size:17px}
+.gurbani-src{font-size:14px;letter-spacing:.06em;color:var(--rose)}
+
+.events{display:grid;gap:18px;width:100%}
+.ev{display:grid;grid-template-columns:110px 1fr;gap:20px;align-items:center;text-align:left;background:#fff;
+  border:1px solid var(--rose);padding:18px}
+.ev img{width:110px;height:auto;display:block}
+.ev .day{font-family:var(--font-cap);font-size:12px;letter-spacing:.2em;color:var(--red)}
+.ev h3{margin:4px 0 6px;font-family:var(--font-cap);font-weight:500;font-size:19px;color:var(--ink);letter-spacing:.03em;line-height:1.3}
+.ev .meta{font-size:16px;line-height:1.5;color:var(--ink)}
+.ev .meta strong{font-weight:500;color:var(--red-deep)}
+.ev .note{margin-top:6px;font-size:15px;font-style:italic;color:var(--muted)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{all:unset;cursor:pointer;font-family:var(--font-cap);font-size:11px;letter-spacing:.16em;color:var(--red);
+  border:1px solid var(--red);padding:8px 14px;border-radius:999px;text-align:center}
+.btn:hover{background:var(--red);color:var(--paper)}
+.btn:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.btn.filled{background:var(--red);color:var(--paper)}
+@media (max-width:460px){.ev{grid-template-columns:1fr;justify-items:center;text-align:center}.ev img{width:150px}.acts{justify-content:center}}
+
+.fam-names{font-family:var(--font-cap);font-size:20px;letter-spacing:.08em;color:var(--red-deep)}
+#contacts{justify-content:center}
+#contacts .btn{display:grid;gap:4px;padding:12px 20px}
+#contacts .btn small{font-family:var(--font-body);font-size:13px;letter-spacing:.02em;text-transform:none;opacity:.85}
+.hosts .script{font-family:var(--font-script);font-size:clamp(34px,8vw,46px);color:var(--red-deep);line-height:1.2}
+.foot{padding-block:28px 90px;text-align:center;font-family:var(--font-cap);font-size:11px;letter-spacing:.24em;color:var(--muted)}
+
+.fab{position:fixed;z-index:4;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-family:var(--font-cap);font-size:11px;letter-spacing:.2em;
+  color:var(--red);background:rgba(251,248,243,.88);border:1px solid var(--red);border-radius:999px;padding:9px 15px;cursor:pointer}
+.fab:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+#replay{right:max(16px,env(safe-area-inset-right,0px))}
+#music{left:max(16px,env(safe-area-inset-left,0px))}
+
+@media (prefers-reduced-motion:reduce){
+  .hint,.sunglow,.water,.revealed .photo{animation:none}
+  .opening .ring{animation:none;opacity:0;transition:opacity .4s}
+  .scene{transition:clip-path .01s}
+  .scene-zoom,.names>*{transition:opacity .6s}
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="intro">
+    <div class="guest" id="guest" hidden><small>Dear</small><span id="guestName"></span><em>you are cordially invited to our wedding</em></div>
+    <div class="eyebrow" id="eyebrow">Save the date</div>
+    <div class="lead" id="lead">Wedding Invitation</div>
+    <button class="ring-btn" id="ringBtn" aria-label="Open the invitation">
+      <div class="ring">
+        <canvas id="ring3d"></canvas>
+        <svg class="fallback" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="112" r="70" fill="none" stroke="#b7b3ae" stroke-width="12"/><path d="M100 20l16 14-16 18-16-18z" fill="#fff" stroke="#b7b3ae" stroke-width="2"/></svg>
+        <div class="mono" aria-hidden="true">S<i>&amp;</i>G</div>
+      </div>
+    </button>
+    <div class="hint">Tap the ring</div>
+  </div>
+
+  <div class="scene" aria-hidden="true">
+    <img class="backdrop" id="backdrop" alt="">
+    <div class="frame">
+      <div class="scene-zoom">
+        <img class="photo" src="couple.jpg" alt="">
+        <div class="sunglow"></div>
+        <div class="water"></div>
+      </div>
+      <div class="names">
+        <h1><span>Saranpreet Singh</span><span class="amp">&amp;</span><span>Gurvinder Kaur</span></h1>
+        <div class="date">07 · 01 · 2027</div>
+        <div class="place">Gurudwara Chhevi Patshahi, Tanda</div>
+      </div>
+    </div>
+    <canvas id="petals"></canvas>
+  </div>
+  <a class="scroll-cue" href="#invite">Scroll<span></span></a>
+</div>
+
+<main id="invite">
+  <section class="sec">
+    <div class="wrap">
+      <div class="ik" lang="pa">ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ</div>
+      <p class="shabad" lang="pa">ਸਤਿਗੁਰ ਦਾਤੇ ਕਾਜ ਰਚਾਇਆ ਆਪਣੀ ਮੇਹਰ ਕਰਾਈ।<br>ਦਾਸਾਂ ਕਾਰਜ ਆਪ ਸਵਾਰੇ ਇਹ ਉਸਦੀ ਵਡਿਆਈ॥</p>
+      <div class="label">With the blessings of</div>
+      <p class="elders">Sdn. Kuldip Kaur &amp; Late S. Dildar Singh</p>
+      <svg class="knot" viewBox="0 0 140 18" aria-hidden="true"><path d="M0 9h52M88 9h52" stroke="currentColor"/><circle cx="62" cy="9" r="6" fill="none" stroke="currentColor"/><circle cx="78" cy="9" r="6" fill="none" stroke="currentColor"/></svg>
+      <p><span class="hostnames">Sdn. Baljit Kaur &amp; S. Jatinder Singh</span><br>seek the pleasure of your gracious presence on the wedding celebrations of their beloved son</p>
+      <svg class="knot" viewBox="0 0 140 18" aria-hidden="true"><path d="M0 9h52M88 9h52" stroke="currentColor"/><circle cx="62" cy="9" r="6" fill="none" stroke="currentColor"/><circle cx="78" cy="9" r="6" fill="none" stroke="currentColor"/></svg>
+      <div class="couple">
+        <div class="who">Saranpreet Singh</div>
+        <div class="of">son of Sdn. Baljit Kaur &amp; S. Jatinder Singh</div>
+        <div class="with">with</div>
+        <div class="who">Gurvinder Kaur</div>
+        <div class="of">daughter of Sdn. Jatinder Kaur &amp; S. Balwinder Singh<br>of Wadi Miani, Distt. Hoshiarpur</div>
+      </div>
+      <div class="datepill">THURSDAY <b>07</b> JANUARY 2027</div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0">
+    <div class="wrap">
+      <div class="label">Anand Karaj in</div>
+      <div class="count">
+        <div><b id="cd-d">0</b><small>days</small></div>
+        <div><b id="cd-h">0</b><small>hours</small></div>
+        <div><b id="cd-m">0</b><small>minutes</small></div>
+        <div><b id="cd-s">0</b><small>seconds</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-red">
+    <div class="wrap">
+      <div class="label">The Four Laavan</div>
+      <h2>Anand Karaj</h2>
+      <p>The sacred Sikh wedding ceremony: four rounds around Sri Guru Granth Sahib Ji.</p>
+      <div class="laav">
+        <div class="laav-item"><div class="no">First Laav</div><div class="pa" lang="pa">ਹਰਿ ਪਹਿਲੜੀ ਲਾਵ ਪਰਵਿਰਤੀ ਕਰਮ ਦ੍ਰਿੜਾਇਆ ਬਲਿ ਰਾਮ ਜੀਉ ॥</div><div class="en">In the first round, the Lord sets out His Instructions for performing the daily duties of married life.</div></div>
+        <div class="laav-item"><div class="no">Second Laav</div><div class="pa" lang="pa">ਹਰਿ ਦੂਜੜੀ ਲਾਵ ਸਤਿਗੁਰੁ ਪੁਰਖੁ ਮਿਲਾਇਆ ਬਲਿ ਰਾਮ ਜੀਉ ॥</div><div class="en">In the second round, the Lord leads you to meet the True Guru, the Primal Being.</div></div>
+        <div class="laav-item"><div class="no">Third Laav</div><div class="pa" lang="pa">ਹਰਿ ਤੀਜੜੀ ਲਾਵ ਮਨਿ ਚਾਉ ਭਇਆ ਬੈਰਾਗੀਆ ਬਲਿ ਰਾਮ ਜੀਉ ॥</div><div class="en">In the third round, the mind is filled with Divine Love, detachment from the world.</div></div>
+        <div class="laav-item"><div class="no">Fourth Laav</div><div class="pa" lang="pa">ਹਰਿ ਚਉਥੜੀ ਲਾਵ ਮਨਿ ਸਹਜੁ ਭਇਆ ਹਰਿ ਪਾਇਆ ਬਲਿ ਰਾਮ ਜੀਉ ॥</div><div class="en">In the fourth round, the mind becomes peaceful and tranquil, and the Lord God is found.</div></div>
+      </div>
+      <div class="gurbani-src">Guru Ram Das Ji · Suhi Mahalla 4</div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="label">Celebrations</div>
+      <h2>Wedding Programme</h2>
+      <div class="events" id="events"></div>
+    </div>
+  </section>
+
+  <section class="sec hosts" style="background:var(--ivory)">
+    <div class="wrap">
+      <div class="label">Cordially invited by</div>
+      <div class="script">Sdn. Baljit Kaur &amp; S. Jatinder Singh</div>
+      <div class="label" style="margin-top:6px">with the</div>
+      <div class="fam-names">Multani &amp; Ghotra Family</div>
+      <p>Your presence is extremely important to us. Please join us!</p>
+      <div class="label" style="margin-top:18px">RSVP</div>
+      <div class="acts" id="contacts" hidden></div>
+    </div>
+  </section>
+  <div class="foot">Saranpreet &amp; Gurvinder · 07.01.2027</div>
+</main>
+
+<button class="fab" id="music" hidden>Music</button>
+<button class="fab" id="replay" hidden>Replay</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===== Fill in ===== */
+const WHATSAPP = [
+  {label:"Jatinder Singh",role:"Father",number:"447903555312",show:"+44 7903 555312"},
+  {label:"Baljit Kaur",role:"Mother",number:"447438542080",show:"+44 7438 542080"}
+];
+const MUSIC = ["music/1.mp3","music/2.mp3","music/3.mp3"];
+const EVENTS = [
+  {day:"Monday 4 January 2027",name:"Arambh Sri Akhand Path Sahib",icon:"icons/ev-path.webp",
+   items:[["10:00 AM","Arambh Sri Akhand Path Sahib"]],where:"At our residence, Village Panj Dhera Kalan, Distt. Hoshiarpur",
+   start:"2027-01-04T10:00:00+05:30",end:"2027-01-04T12:00:00+05:30",map:"Panj Dhera Kalan, Hoshiarpur, Punjab"},
+  {day:"Wednesday 6 January 2027",name:"Bhog Sri Akhand Path Sahib",icon:"icons/ev-bhog.webp",
+   items:[["10:00 AM","Bhog Sri Akhand Path Sahib"],["11:00 AM","Kirtan, until 12:00 noon"],["1:00 PM","Guru Ka Langar"]],where:"Village Panj Dhera Kalan, Distt. Hoshiarpur",
+   start:"2027-01-06T10:00:00+05:30",end:"2027-01-06T14:00:00+05:30",map:"Panj Dhera Kalan, Hoshiarpur, Punjab"},
+  {day:"Wednesday 6 January 2027",name:"Jaggo",icon:"icons/ev-jaago.webp",
+   items:[["6:00 PM","Jaggo"]],where:"Village Panj Dhera Kalan, Distt. Hoshiarpur",
+   start:"2027-01-06T18:00:00+05:30",end:"2027-01-06T23:00:00+05:30",map:"Panj Dhera Kalan, Hoshiarpur, Punjab"},
+  {day:"Thursday 7 January 2027",name:"Anand Karaj",icon:"icons/ev-anand.webp",
+   items:[["8:30 AM","Sehra Bandi at our residence"],["9:30 AM","Departure of Barat for White House Palace"],["11:00 AM","Anand Karaj at Gurudwara Chhevi Patshahi"]],where:"White House Palace, near Pul Pukhta, Tanda Road, Tanda",
+   start:"2027-01-07T08:30:00+05:30",end:"2027-01-07T15:00:00+05:30",map:"White House Palace, Tanda Road, Tanda, Punjab",
+   map2:{label:"Gurudwara",q:"Gurudwara Chhevi Patshahi, Pul Pukhta, Tanda, Punjab"}},
+  {day:"Saturday 9 January 2027",name:"Reception Party",icon:"icons/ev-reception.webp",
+   items:[["7:00 PM","Reception Party"],["8:30 PM","Dinner"]],where:"RC Resort, Gurdaspur Road, Mukerian",
+   start:"2027-01-09T19:00:00+05:30",end:"2027-01-09T23:30:00+05:30",map:"RC Resort, Gurdaspur Road, Mukerian, Punjab"}
+];
+const WEDDING = new Date("2027-01-07T11:00:00+05:30");
+
+(function(){
+  const stage=document.getElementById('stage');
+  const btn=document.getElementById('ringBtn');
+  const replay=document.getElementById('replay');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let started=false;
+  document.getElementById('backdrop').src=document.querySelector('.photo').src;
+
+  /* personal greeting: ?n=Name+Surname  (also accepts ?Name+Surname) */
+  let guest='';
+  try{const q=location.search.slice(1);const p=new URLSearchParams(q);
+    guest=p.get('n')||p.get('name')||(q&&q.indexOf('=')<0?decodeURIComponent(q.replace(/\+/g,' ')):'');
+    guest=guest.replace(/\s+/g,' ').trim().slice(0,60)}catch(e){}
+  if(guest){document.getElementById('guestName').textContent=guest;document.getElementById('guest').hidden=false;
+    document.getElementById('lead').hidden=true;document.getElementById('eyebrow').textContent='Save the date · 07 · 01 · 2027';
+    document.title='Dear '+guest+' · Saranpreet & Gurvinder'}
+
+  /* events */
+  const evWrap=document.getElementById('events');
+  EVENTS.forEach((e,i)=>{
+    const d=document.createElement('article');d.className='ev';
+    d.innerHTML=`<img src="${e.icon}" alt="" loading="lazy"><div><div class="day">${e.day}</div><h3>${e.name}</h3><div class="meta"><ul class="sched">${e.items.map(x=>`<li><b>${x[0]}</b>${x[1]===e.name?'':`<span>${x[1]}</span>`}</li>`).join('')}</ul><span class="where">${e.where}</span></div>
+      <div class="acts"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.map)}">Directions</a>${e.map2?`<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.map2.q)}">${e.map2.label}</a>`:''}
+      <button class="btn" data-ics="${i}">Add to calendar</button></div></div>`;
+    evWrap.appendChild(d);
+  });
+  function stamp(iso){return new Date(iso).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'}
+  evWrap.addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-ics]');if(!b)return;const e=EVENTS[+b.dataset.ics];
+    const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Saranpreet Gurvinder//EN','BEGIN:VEVENT',
+      'UID:'+Date.now()+'-'+b.dataset.ics+'@wedding','DTSTAMP:'+stamp(new Date().toISOString()),
+      'DTSTART:'+stamp(e.start),'DTEND:'+stamp(e.end),'SUMMARY:'+e.name+' - Saranpreet & Gurvinder',
+      'LOCATION:'+e.map.replace(/,/g,'\\,'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));
+    a.download=e.name.replace(/\s+/g,'-')+'.ics';document.body.appendChild(a);a.click();a.remove();
+  });
+
+  /* contacts */
+  if(WHATSAPP.length){const c=document.getElementById('contacts');c.hidden=false;
+    WHATSAPP.forEach(w=>{const a=document.createElement('a');a.className='btn filled';a.target='_blank';a.rel='noopener';
+      a.href='https://wa.me/'+w.number+'?text='+encodeURIComponent('Sat Sri Akal Ji, we will be there for Saranpreet & Gurvinder\'s wedding!');a.innerHTML='WhatsApp '+w.label+'<small>'+w.role+' · '+w.show+'</small>';c.appendChild(a)})}
+
+  /* music: shown only if a track loads */
+  const musicBtn=document.getElementById('music');const audio=new Audio();audio.loop=true;audio.preload='auto';
+  let musicOk=false;audio.src=MUSIC[Math.floor(Math.random()*MUSIC.length)];
+  audio.addEventListener('canplay',()=>{musicOk=true},{once:true});
+  musicBtn.addEventListener('click',()=>{if(audio.paused){audio.play().catch(()=>{});musicBtn.textContent='Pause'}else{audio.pause();musicBtn.textContent='Music'}});
+
+  const ring3d=initRing();
+  btn.addEventListener('click',()=>{
+    if(started)return;started=true;
+    stage.classList.add('opening');if(ring3d)ring3d.spin();
+    if(musicOk){audio.play().then(()=>{musicBtn.textContent='Pause'}).catch(()=>{})}
+    setTimeout(()=>{stage.classList.add('revealed');startPetals()},reduce?100:900);
+    setTimeout(()=>{replay.hidden=false;musicBtn.hidden=!musicOk;document.body.classList.add('unlocked')},reduce?400:4500);
+  });
+  replay.addEventListener('click',()=>{
+    document.body.scrollTop=0;document.documentElement.scrollTop=0;document.body.classList.remove('unlocked');
+    stage.classList.remove('opening','revealed');replay.hidden=true;started=false;stopPetals();if(ring3d)ring3d.reset();
+  });
+
+  /* countdown */
+  function tick(){const s=Math.max(0,Math.floor((WEDDING-new Date())/1000));
+    document.getElementById('cd-d').textContent=Math.floor(s/86400);
+    document.getElementById('cd-h').textContent=Math.floor(s%86400/3600);
+    document.getElementById('cd-m').textContent=Math.floor(s%3600/60);
+    document.getElementById('cd-s').textContent=s%60}
+  tick();setInterval(tick,1000);
+
+  /* 3D white-gold solitaire */
+  function initRing(){
+    const cv=document.getElementById('ring3d');
+    if(!window.THREE){document.body.classList.add('no-webgl');return null}
+    let renderer;
+    try{renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true})}catch(e){document.body.classList.add('no-webgl');return null}
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(30,1,0.1,50);camera.position.set(0,0,6.4);camera.lookAt(0,0,0);
+    const env=new THREE.Scene();env.background=new THREE.Color(0x3c3838);
+    const box=new THREE.BoxGeometry(1,1,1);
+    function panel(c,k,p,s){const m=new THREE.Mesh(box,new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(k)}));m.position.set(...p);m.scale.set(...s);env.add(m)}
+    panel(0xffffff,6,[0,6,0],[8,.2,8]);panel(0xffffff,4,[-6,1,2],[.2,5,4]);panel(0xfff4ec,3,[6,-1,1],[.2,4,6]);
+    panel(0xffffff,5,[0,1,7],[5,2,.2]);panel(0x8a8480,1,[0,-6,0],[10,.2,10]);panel(0x111111,1,[0,0,-7],[12,6,.2]);panel(0xffffff,8,[3,3,-5],[1,1,.2]);
+    const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(env,0.03).texture;
+    const grp=new THREE.Group();scene.add(grp);
+    const pts=[],R=0.94,a=0.075,b=0.15,n=48;
+    for(let i=0;i<=n;i++){const t=-Math.PI+i/n*2*Math.PI,c=Math.cos(t),s=Math.sin(t);
+      pts.push(new THREE.Vector2(R+a*Math.sign(c)*Math.pow(Math.abs(c),.6),b*Math.sign(s)*Math.pow(Math.abs(s),.6)))}
+    const metal=new THREE.MeshStandardMaterial({color:0xdedbd7,metalness:1,roughness:0.1,envMapIntensity:1.2});
+    const band=new THREE.Mesh(new THREE.LatheGeometry(pts,160),metal);band.rotation.x=Math.PI/2;grp.add(band);
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(.1,.16,.12,32),metal);base.position.y=1.03;grp.add(base);
+    const collar=new THREE.Mesh(new THREE.TorusGeometry(.15,.035,16,48),metal);collar.rotation.x=Math.PI/2;collar.position.y=1.1;grp.add(collar);
+    for(let i=0;i<6;i++){const g=i/6*Math.PI*2+Math.PI/6;
+      const pr=new THREE.Mesh(new THREE.CylinderGeometry(.022,.03,.42,12),metal);pr.position.set(Math.cos(g)*.2,1.24,Math.sin(g)*.2);
+      pr.rotation.z=-Math.cos(g)*.22;pr.rotation.x=Math.sin(g)*.22;grp.add(pr);
+      const tip=new THREE.Mesh(new THREE.SphereGeometry(.03,12,12),metal);tip.position.set(Math.cos(g)*.255,1.44,Math.sin(g)*.255);grp.add(tip)}
+    const prof=[[0,-.24],[.26,0],[.27,.025],[.17,.13],[0,.13]].map(p=>new THREE.Vector2(p[0],p[1]));
+    const stone=new THREE.Mesh(new THREE.LatheGeometry(prof,16),new THREE.MeshPhysicalMaterial({color:0xf4f8ff,metalness:.9,roughness:.02,clearcoat:1,clearcoatRoughness:0,flatShading:true,envMapIntensity:2.4}));
+    stone.position.y=1.38;grp.add(stone);
+    const sc=document.createElement('canvas');sc.width=sc.height=128;const sx=sc.getContext('2d');
+    const gr=sx.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.15,'rgba(255,250,245,.6)');gr.addColorStop(1,'rgba(255,255,255,0)');
+    sx.fillStyle=gr;sx.fillRect(0,0,128,128);sx.fillStyle='rgba(255,255,255,.9)';sx.fillRect(62,4,4,120);sx.fillRect(4,62,120,4);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(sc),color:0xffffff,blending:THREE.NormalBlending,depthWrite:false,transparent:true}));
+    sp.position.set(.08,1.48,.15);sp.scale.set(.5,.5,1);grp.add(sp);
+    grp.position.y=0;
+    function size(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+    size();addEventListener('resize',size);
+    let spinStart=null,base0=0,target0=0;const clock=new THREE.Clock();
+    const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+    (function loop(){
+      const t=clock.getElapsedTime();
+      if(spinStart===null){const k=reduce?0:1;grp.rotation.y=Math.sin(t*.55)*.55*k;grp.position.y=Math.sin(t*1.2)*.04*k}
+      else{grp.rotation.y=base0+ease(Math.min(1,(t-spinStart)/1.6))*(target0-base0);grp.position.y=0}
+      sp.material.opacity=reduce?.7:Math.max(0,.55+.45*Math.pow(Math.max(0,Math.sin(t*2.3)),6)+.2*Math.sin(t*7.1));
+      sp.material.rotation=t*.4;
+      if(!stage.classList.contains('revealed')||t-spinStart<3)renderer.render(scene,camera);
+      requestAnimationFrame(loop);
+    })();
+    return{spin(){base0=grp.rotation.y;target0=Math.round(base0/(Math.PI*2))*Math.PI*2+Math.PI*4;spinStart=clock.getElapsedTime()},reset(){spinStart=null}};
+  }
+
+  /* red rose and white petals */
+  const cv=document.getElementById('petals'),ctx=cv.getContext('2d');let petals=[],raf=null,W=0,H=0;
+  const colors=['#9e1b2c','#c22a3f','#e04a5f','#ffffff','#f6dede'];
+  function resize(){const d=window.devicePixelRatio||1;W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+  function make(){return{x:Math.random()*W,y:-20-Math.random()*H,s:5+Math.random()*7,vy:.6+Math.random()*1.1,vx:-.3+Math.random()*.6,
+    r:Math.random()*6.28,vr:-.03+Math.random()*.06,sw:Math.random()*6.28,c:colors[Math.floor(Math.random()*colors.length)]}}
+  function frame(){ctx.clearRect(0,0,W,H);
+    for(const p of petals){p.sw+=.02;p.y+=p.vy;p.x+=p.vx+Math.sin(p.sw)*.6;p.r+=p.vr;if(p.y>H+20)Object.assign(p,make(),{y:-20});
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.globalAlpha=.9;ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=3;
+      ctx.beginPath();ctx.ellipse(0,0,p.s,p.s*.55,0,0,6.28);ctx.fill();ctx.restore()}
+    raf=requestAnimationFrame(frame)}
+  function startPetals(){if(reduce)return;resize();petals=Array.from({length:Math.min(60,Math.round(W/14))},make);if(!raf)frame()}
+  function stopPetals(){if(raf)cancelAnimationFrame(raf);raf=null;ctx.clearRect(0,0,cv.width,cv.height)}
+  addEventListener('resize',()=>{if(raf)resize()});
+})();
+</script>
+</body>
+</html>
