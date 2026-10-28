@@ -23,12 +23,15 @@
   --font-pa:"Noto Serif Gurmukhi","Raavi","Mukta Mahee",serif;
   color-scheme:light;
 }
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:18px;overflow:hidden}
-body.unlocked{overflow-y:auto;overflow-x:hidden}
+html,body{overflow:hidden;overscroll-behavior:none}
+html.unlocked,body.unlocked{overflow-y:auto;overflow-x:hidden;height:auto}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:18px;-webkit-text-size-adjust:100%}
 
 /* stage */
-.stage{position:relative;height:100%;min-height:100%;overflow:hidden;display:grid;place-items:center;
+.stage{position:relative;height:100vh;height:100svh;min-height:100%;overflow:hidden;display:grid;place-items:center;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:radial-gradient(ellipse at 50% 45%,#ffffff 0%,var(--paper) 45%,var(--ivory) 100%)}
 .stage::before{content:"";position:absolute;inset:14px;border:1px solid var(--rose);pointer-events:none;
@@ -306,7 +309,7 @@ const WHATSAPP = [
   {label:"Jatinder Singh",role:"Father",number:"447903555312",show:"+44 7903 555312"},
   {label:"Baljit Kaur",role:"Mother",number:"447438542080",show:"+44 7438 542080"}
 ];
-const MUSIC = ["music/1.mp3","music/2.mp3","music/3.mp3"];
+const MUSIC = ["music/1.mp3","music/2.mp3","music/3.mp3","music/4.mp3","music/5.mp3","music/6.mp3","music/7.mp3","music/8.mp3"];
 const EVENTS = [
   {day:"Monday 4 January 2027",name:"Arambh Sri Akhand Path Sahib",icon:"icons/ev-path.webp",
    items:[["10:00 AM","Arambh Sri Akhand Path Sahib"]],where:"At our residence, Village Panj Dhera Kalan, Distt. Hoshiarpur",
@@ -370,21 +373,22 @@ const WEDDING = new Date("2027-01-07T11:00:00+05:30");
       a.href='https://wa.me/'+w.number+'?text='+encodeURIComponent('Sat Sri Akal Ji, we will be there for Saranpreet & Gurvinder\'s wedding!');a.innerHTML='WhatsApp '+w.label+'<small>'+w.role+' · '+w.show+'</small>';c.appendChild(a)})}
 
   /* music: shown only if a track loads */
-  const musicBtn=document.getElementById('music');const audio=new Audio();audio.loop=true;audio.preload='auto';
+  const musicBtn=document.getElementById('music');const audio=new Audio();audio.loop=true;audio.preload='auto';audio.setAttribute('playsinline','');
   let musicOk=false;audio.src=MUSIC[Math.floor(Math.random()*MUSIC.length)];
-  audio.addEventListener('canplay',()=>{musicOk=true},{once:true});
+  audio.addEventListener('playing',()=>{musicOk=true;musicBtn.textContent='Pause'});
+  audio.addEventListener('error',()=>{musicOk=false;musicBtn.hidden=true});
   musicBtn.addEventListener('click',()=>{if(audio.paused){audio.play().catch(()=>{});musicBtn.textContent='Pause'}else{audio.pause();musicBtn.textContent='Music'}});
 
   const ring3d=initRing();
   btn.addEventListener('click',()=>{
     if(started)return;started=true;
     stage.classList.add('opening');if(ring3d)ring3d.spin();
-    if(musicOk){audio.play().then(()=>{musicBtn.textContent='Pause'}).catch(()=>{})}
+    try{const pr=audio.play();if(pr&&pr.catch)pr.catch(()=>{})}catch(e){}
     setTimeout(()=>{stage.classList.add('revealed');startPetals()},reduce?100:900);
-    setTimeout(()=>{replay.hidden=false;musicBtn.hidden=!musicOk;document.body.classList.add('unlocked')},reduce?400:4500);
+    setTimeout(()=>{replay.hidden=false;musicBtn.hidden=!(musicOk||audio.readyState>0);document.body.classList.add('unlocked');document.documentElement.classList.add('unlocked')},reduce?400:4500);
   });
   replay.addEventListener('click',()=>{
-    document.body.scrollTop=0;document.documentElement.scrollTop=0;document.body.classList.remove('unlocked');
+    document.body.scrollTop=0;document.documentElement.scrollTop=0;document.body.classList.remove('unlocked');document.documentElement.classList.remove('unlocked');
     stage.classList.remove('opening','revealed');replay.hidden=true;started=false;stopPetals();if(ring3d)ring3d.reset();
   });
 
